@@ -22,7 +22,7 @@ const signIn = async (req, res) => {
   if (userModel.comparePassword(password, findUser.password)) {
     res.json({ data: findUser, token: token })
   } else {
-    console.log('Username or password is incorrect')
+    res.json({ message: 'Username or password is incorrect' })
   }
 }
 
