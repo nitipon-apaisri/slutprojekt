@@ -1,7 +1,7 @@
 const express = require("express");
+const errorHandler = require("./middlewares/errorHandler");
 const app = express();
 
-// custom middlewares
 const loggerMiddleware = require("./middlewares/logger");
 
 const PORT = process.env.PORT || 3000;
@@ -16,6 +16,7 @@ app.get("/", (req, res, next) => {
   res.json({ message: "welcome" });
 });
 
+app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running on PORT:${PORT}`);
 });
