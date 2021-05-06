@@ -1,4 +1,4 @@
-const BaseError = require('../models/errors/BaseError')
+const BaseError = require('../models/errors/base')
 module.exports = (error, req, res, next) => {
   if (error instanceof BaseError) {
     return res.status(error.errorCode).json({ error: error.message })
