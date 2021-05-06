@@ -4,7 +4,6 @@ const User = require('../models/userModel')
 const postCreateTask = async (req, res, next) => {
   try {
     const { user } = req
-
     const { title, info, clientId } = req.body
     const client = await User.findById(clientId)
 
@@ -32,6 +31,14 @@ const getTasks = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id)
     const tasks = user.tasks
+
+    const { filter, search } = req.params
+    if (search) {
+      tasks = tasks.filter(t => t.client.includes(search))
+    }
+    if (filter === 'done') {
+      tasks = tasks.filter(t => t.completed === 'done')
+    }
     res.json(tasks)
   } catch (error) {
     next(error)
