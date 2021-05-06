@@ -1,4 +1,3 @@
-require('dotenv').config({ path: '../config/.env' })
 const express = require('express')
 const errorHandler = require('./middlewares/errorHandler')
 const connect = require('./database/connection')
