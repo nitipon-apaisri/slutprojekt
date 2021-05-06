@@ -1,4 +1,21 @@
 const jwt = require('jsonwebtoken')
+const authErrorModel = require('../models/errors/unauthorized')
+
+const Roles = {
+  ADMIN: 'admin',
+  CLIENT: 'client',
+  WORKER: 'worker'
+}
+
+const authError = message => {
+  throw new authErrorModel.Unauthorized(message)
+}
+
+const authInvalidAccessError = () => {
+  throw new authErrorModel.Unauthorized(
+    authErrorModel.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+  )
+}
 
 const authorization = (req, res, next) => {
   const { authorization } = req.headers
@@ -6,16 +23,42 @@ const authorization = (req, res, next) => {
     throw new Error('Unauthorized')
   }
   const token = authorization.replace('Bearer ', '')
-  req.user = jwt.verify(token, process.env.JWT_SECRET)
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET)
+  } catch {
+    authError(authErrorModel.ErrorMessage.FORBIDDEN_INVALID_TOKEN)
+  }
   next()
 }
 
-const rbac = (req, res, next) => {
-  const { role } = req.user
-  return (...validRoles) => validRoles.includes(role)
+const Role = {
+  ADMIN: 'admin',
+  CLIENT: 'client',
+  WORKER: 'worker'
 }
+
+const hasRole = (role, ...roles) => roles.includes(role)
+
+const workerAccess = (req, res, next) =>
+  hasRole(req.user.role, Role.WORKER) ? next() : authInvalidAccessError()
+
+const workerAndClientAccess = (req, res, next) =>
+  hasRole(req.user.role, Role.WORKER, Role.CLIENT)
+    ? next()
+    : authInvalidAccessError()
+
+const workerAndAdminAccess = (req, res, next) =>
+  hasRole(req.user.role, Role.WORKER, Role.ADMIN)
+    ? next()
+    : authInvalidAccessError()
+
+const adminAccess = (req, res, next) =>
+  hasRole(req.user.role, Role.ADMIN) ? next() : authInvalidAccessError()
 
 module.exports = {
   authorization,
-  rbac
+  workerAccess,
+  workerAndClientAccess,
+  workerAndAdminAccess,
+  adminAccess
 }
