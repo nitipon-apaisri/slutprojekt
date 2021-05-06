@@ -12,6 +12,10 @@ const createUser = async (req, res) => {
   res.json({ message: 'Success', data: newUser })
 }
 
+// const signIn = async (req,res) => {
+//     const {username, password} = req.body
+// }
+
 module.exports = {
   createUser
 }
