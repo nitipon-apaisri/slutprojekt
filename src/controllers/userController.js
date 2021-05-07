@@ -15,15 +15,14 @@ const createUser = async (req, res) => {
 }
 
 const signIn = async (req, res) => {
-  const { username, password, role } = req.body
-  const payload = { username: username, role: role }
-  const token = jwt.sign(payload, JWT_SECRET)
+  const { username, password } = req.body
   const findUser = await userModel.findOne({ username }).exec()
-  if (userModel.comparePassword(password, findUser.password)) {
-    res.json({ data: findUser, token: token })
-  } else {
-    res.json({ message: 'Username or password is incorrect' })
+  if (!userModel.comparePassword(password, findUser.password)) {
+    return res.json({ message: 'Username or password is incorrect' })
   }
+  const payload = { username: findUser._id, role: findUser.role }
+  const token = jwt.sign(payload, JWT_SECRET)
+  res.json({ data: findUser, token: token })
 }
 
 const updateUser = async (req, res) => {
