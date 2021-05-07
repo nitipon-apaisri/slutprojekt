@@ -14,5 +14,11 @@ router.post(
   authMiddleware.adminAccess,
   userController.createUser
 )
+router.delete(
+  '/users/:id',
+  authMiddleware.authorization,
+  authMiddleware.adminAccess,
+  userController.deleteUser
+)
 
 module.exports = router

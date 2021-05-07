@@ -39,8 +39,20 @@ const updateUser = async (req, res) => {
   res.json({ message: findUser })
 }
 
+const deleteUser = async (req, res) => {
+  const id = req.params.id
+  await userModel.deleteOne({ _id: id }, function (err) {
+    if (err) {
+      res.json({ message: err })
+    } else {
+      res.json({ message: 'Successful delation' })
+    }
+  })
+}
+
 module.exports = {
   createUser,
   signIn,
-  updateUser
+  updateUser,
+  deleteUser
 }
