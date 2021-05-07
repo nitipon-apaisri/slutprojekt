@@ -16,13 +16,18 @@ const createUser = async (req, res) => {
 
 const signIn = async (req, res) => {
   const { username, password } = req.body
-  const findUser = await userModel.findOne({ username }).exec()
+  const findUser = await userModel.findOne({ username })
   if (!userModel.comparePassword(password, findUser.password)) {
     return res.json({ message: 'Username or password is incorrect' })
   }
   const payload = { username: findUser._id, role: findUser.role }
   const token = jwt.sign(payload, JWT_SECRET)
   res.json({ data: findUser, token: token })
+}
+
+const listUsers = async (req, res) => {
+  const findUsers = await userModel.find()
+  res.json({ data: findUsers })
 }
 
 const updateUser = async (req, res) => {
@@ -54,5 +59,6 @@ module.exports = {
   createUser,
   signIn,
   updateUser,
-  deleteUser
+  deleteUser,
+  listUsers
 }
