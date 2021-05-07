@@ -1,4 +1,3 @@
-require('dotenv').config({ path: '../config/.env' })
 const { MongoMemoryServer } = require('mongodb-memory-server')
 const mongoose = require('mongoose')
 const mongod = new MongoMemoryServer()

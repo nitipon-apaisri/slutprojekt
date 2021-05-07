@@ -1,7 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const userController = require('../controllers/userController')
+const usersRoutes = require('./usersRoutes')
+const taskRoutes = require('./tasksRoutes')
+const genericRoutes = require('./genericRoutes')
 
-router.post('/users', userController.createUser)
-router.get('/users', userController.signIn)
-module.exports = router
+module.exports = {
+  usersRoutes,
+  taskRoutes,
+  genericRoutes
+}
