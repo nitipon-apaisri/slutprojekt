@@ -1,6 +1,7 @@
 const taskModel = require('../models/taskModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
+const { findByIdAndDelete } = require('../models/taskModel')
 
 const postCreateTask = async (req, res, next) => {
   try {
@@ -22,7 +23,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ message: 'success' })
+    res.json({ message: 'task posted' })
   } catch (error) {
     next(error)
   }
@@ -79,7 +80,7 @@ const patchUpdateTask = async (req, res, next) => {
       }
     )
     await updateTask.save()
-    res.json({ message: 'updated' })
+    res.json({ message: 'task updated' })
   } catch (error) {
     next(error)
   }
@@ -90,7 +91,7 @@ const deleteTaskById = async (req, res, next) => {
     const taskId = req.params.id
     const deleteTask = await taskModel.findByIdAndDelete(taskId)
     await deleteTask.save()
-    res.json({ message: 'deleted' })
+    res.json({ message: 'task deleted' })
   } catch (error) {
     next(error)
   }
@@ -114,6 +115,8 @@ const postMessageToTask = async (req, res, next) => {
     const task = await taskModel.findById(taskId)
     task.messages.push(newMessage)
     await task.save()
+
+    res.json({message: 'message posted'})
   } catch (error) {
     next(error)
   }
@@ -135,6 +138,18 @@ const getAllMessagesFromTask = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+},
+
+const deleteMessage = async (req, res, next) => {
+  try{
+    const {messageId} = req.body
+    const deleteMessage = await messageModel.findByIdAndDelete(messageId)
+    await deleteMessage.save()
+
+    res.json({message: 'message deleted'})
+  } catch (error) {
+    next(error)
+  }
 }
 
 module.exports = {
@@ -144,5 +159,6 @@ module.exports = {
   patchUpdateTask,
   deleteTaskById,
   getAllMessagesFromTask,
-  postMessageToTask
+  postMessageToTask,
+  deleteMessage
 }
