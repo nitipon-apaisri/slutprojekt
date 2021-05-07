@@ -1,7 +1,6 @@
 const taskModel = require('../models/taskModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
-const { findByIdAndDelete } = require('../models/taskModel')
 
 const postCreateTask = async (req, res, next) => {
   try {
