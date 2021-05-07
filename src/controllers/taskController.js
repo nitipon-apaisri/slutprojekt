@@ -115,7 +115,7 @@ const postMessageToTask = async (req, res, next) => {
     task.messages.push(newMessage)
     await task.save()
 
-    res.json({message: 'message posted'})
+    res.json({ message: 'message posted' })
   } catch (error) {
     next(error)
   }
@@ -137,15 +137,15 @@ const getAllMessagesFromTask = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-},
+}
 
 const deleteMessage = async (req, res, next) => {
-  try{
-    const {messageId} = req.body
+  try {
+    const { messageId } = req.body
     const deleteMessage = await messageModel.findByIdAndDelete(messageId)
     await deleteMessage.save()
 
-    res.json({message: 'message deleted'})
+    res.json({ message: 'message deleted' })
   } catch (error) {
     next(error)
   }
