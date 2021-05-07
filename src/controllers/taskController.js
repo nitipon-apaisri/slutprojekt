@@ -125,15 +125,11 @@ const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
 
-    const task = await taskModel.findById(taskId)
-    const messages = task.messages
-    //messages.sort((a, b) => a.createdAt - b.createdAt)
-    const { page = 1, limit = 10 } = req.query
-    const startAt = page - 1 * limit
-    const endAt = startAt + limit - 1
-    const messagesPerPage = messages.slice(startAt, endAt)
-
-    res.json(messagesPerPage)
+    const messages = await taskModel.findById(taskId, 'messages').populate({
+      path: 'Message',
+      options: { limit: 2, sort: { created: -1 }, skip: 0 } //created: -1 or 0
+    })
+    res.json(messages)
   } catch (error) {
     next(error)
   }
