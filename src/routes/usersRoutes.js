@@ -6,13 +6,26 @@ const router = Router()
 router.get(
   '/users',
   authMiddleware.authorization,
-  authMiddleware.workerAndAdminAccess
+  authMiddleware.workerAndAdminAccess,
+  userController.listUsers
 )
 router.post(
   '/users',
   authMiddleware.authorization,
   authMiddleware.adminAccess,
   userController.createUser
+)
+router.patch(
+  '/users/:id',
+  authMiddleware.authorization,
+  authMiddleware.adminAccess,
+  userController.updateUser
+)
+router.delete(
+  '/users/:id',
+  authMiddleware.authorization,
+  authMiddleware.adminAccess,
+  userController.deleteUser
 )
 
 module.exports = router
