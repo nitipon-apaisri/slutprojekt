@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const { Schema } = mongoose
+
 const userSchema = new Schema(
   {
     username: String,
@@ -14,12 +15,24 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 )
-userSchema.pre('save', function () {
+
+userSchema.pre('validate', function () {
   const user = this
+  const modified_paths = user.modifiedPaths()
+  console.log(modified_paths)
   if (user.isModified('password')) {
     user.password = bcrypt.hashSync(user.password, 10)
   }
 })
+
+userSchema.pre('updateOne', function () {
+  const user = this
+  const updateUser = user.getUpdate()
+  if (updateUser.password) {
+    updateUser.password = bcrypt.hashSync(updateUser.password, 10)
+  }
+})
+
 userSchema.static('comparePassword', (password, userPassword) => {
   return bcrypt.compareSync(password, userPassword)
 })

@@ -26,7 +26,22 @@ const signIn = async (req, res) => {
   }
 }
 
+const updateUser = async (req, res) => {
+  const id = req.params.id
+  const changeInfo = req.body
+  if (Object.keys(changeInfo).length !== 0) {
+    await userModel.updateOne({ _id: id }, changeInfo, {
+      new: true
+    })
+  } else {
+    return res.status(400).json({ message: 'No body provide' })
+  }
+  const findUser = await userModel.findById({ _id: id })
+  res.json({ message: findUser })
+}
+
 module.exports = {
   createUser,
-  signIn
+  signIn,
+  updateUser
 }
