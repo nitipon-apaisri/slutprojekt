@@ -7,12 +7,7 @@ router.get(
   '/users',
   authMiddleware.authorization,
   authMiddleware.workerAndAdminAccess,
-  userController.listUsers
-)
-router.get(
-  '/users/:id',
-  authMiddleware.authorization,
-  userController.getUserById
+  userController.signIn
 )
 router.post(
   '/users',
