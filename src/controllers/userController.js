@@ -36,6 +36,19 @@ const getMe = async (req, res) => {
   res.json({ data: findUser })
 }
 
+const updateMe = async (req, res) => {
+  const userId = req.user.username
+  const changeInfo = req.body
+  if (Object.keys(changeInfo).length !== 0) {
+    await userModel.updateOne({ _id: userId }, changeInfo, {
+      new: true
+    })
+    res.json({ message: 'Update successful' })
+  } else {
+    return res.status(400).json({ message: 'No body provide' })
+  }
+}
+
 const getUserById = async (req, res) => {
   const id = req.params.id
   const findAnUser = await userModel.findById({ _id: id })
@@ -49,6 +62,7 @@ const updateUser = async (req, res) => {
     await userModel.updateOne({ _id: id }, changeInfo, {
       new: true
     })
+    res.json({ message: 'Update successful' })
   } else {
     return res.status(400).json({ message: 'No body provide' })
   }
@@ -74,5 +88,6 @@ module.exports = {
   deleteUser,
   listUsers,
   getUserById,
-  getMe
+  getMe,
+  updateMe
 }
