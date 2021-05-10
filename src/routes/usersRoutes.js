@@ -9,6 +9,11 @@ router.get(
   authMiddleware.workerAndAdminAccess,
   userController.listUsers
 )
+router.get(
+  '/users/:id',
+  authMiddleware.authorization,
+  userController.getUserById
+)
 router.post(
   '/users',
   authMiddleware.authorization,
