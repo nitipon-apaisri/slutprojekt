@@ -4,6 +4,6 @@ const userController = require('../controllers/userController')
 const router = Router()
 
 router.post('/auth', userController.signIn)
-router.get('/me', authMiddleware.authorization)
+router.get('/me', authMiddleware.authorization, userController.getMe)
 
 module.exports = router
