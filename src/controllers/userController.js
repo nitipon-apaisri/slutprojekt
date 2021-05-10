@@ -4,11 +4,12 @@ const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
 
 const createUser = async (req, res) => {
-  const { username, password, role } = req.body
+  const { username, password, role, profile } = req.body
   const newUser = await userModel({
     username: username,
     password: password,
-    role: role
+    role: role,
+    profile: profile
   })
   await newUser.save()
   res.json({ message: 'Success', data: newUser })

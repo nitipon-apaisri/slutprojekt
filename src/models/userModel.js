@@ -10,6 +10,11 @@ const userSchema = new Schema(
       type: String,
       enum: ['client', 'admin', 'worker'],
       default: 'worker'
+    },
+    profile: {
+      firstName: String,
+      lastName: String,
+      age: Number
     }
     //tasks: [{type: mongoose.Types.ObjectId, ref: 'Task'}]
   },
