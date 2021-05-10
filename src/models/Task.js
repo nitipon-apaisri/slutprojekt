@@ -12,7 +12,7 @@ const taskSchema = new Schema(
       required: [true, 'Task must have a description.']
     },
     image: {
-      type: String
+      type: Buffer
     },
     client: {
       type: String
