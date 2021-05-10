@@ -10,6 +10,11 @@ const userSchema = new Schema(
       type: String,
       enum: ['client', 'admin', 'worker'],
       default: 'worker'
+    },
+    profile: {
+      firstName: String,
+      lastName: String,
+      age: Number
     }
     //tasks: [{type: mongoose.Types.ObjectId, ref: 'Task'}]
   },
@@ -18,8 +23,6 @@ const userSchema = new Schema(
 
 userSchema.pre('validate', function () {
   const user = this
-  const modified_paths = user.modifiedPaths()
-  console.log(modified_paths)
   if (user.isModified('password')) {
     user.password = bcrypt.hashSync(user.password, 10)
   }
