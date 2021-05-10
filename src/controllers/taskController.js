@@ -11,7 +11,7 @@ const postCreateTask = async (req, res, next) => {
     const newTask = await taskModel.create({
       title,
       info,
-      client: client.userName
+      client: client.username
     })
 
     const existingUser = await userModel.findById(user.id)
@@ -22,7 +22,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ message: 'task posted' })
+    res.json({ client, existingUser, newTask })
   } catch (error) {
     next(error)
   }
@@ -30,9 +30,8 @@ const postCreateTask = async (req, res, next) => {
 
 const getTasks = async (req, res, next) => {
   try {
-    const user = await userModel.findById(req.user.id)
-    const tasks = user.tasks
-
+    const user = await userModel.findById(req.user.id).populate('tasks')
+    let tasks = user.tasks
     const { filter, search } = req.query
     if (search) {
       tasks = tasks.filter(t => t.client.includes(search))
@@ -52,9 +51,9 @@ const getTaskById = async (req, res, next) => {
 
     const { role, id } = req.user
     if (role === 'client') {
-      const user = await userModel.findById(id)
-      const userTasks = user.tasks
-      const task = userTasks.filter(t => t._id === req.params.id)
+      const client = await userModel.findById(id).populate('tasks')
+      const tasks = client.tasks
+      const task = tasks.find(t => t._id == taskId)
       res.json(task)
     } else {
       const task = await taskModel.findById(taskId)
@@ -69,7 +68,8 @@ const patchUpdateTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
     const { title, info, clientId, completed } = req.body
-    const updateTask = await taskModel.updateOne(
+
+    await taskModel.updateOne(
       { _id: taskId },
       {
         title,
@@ -78,7 +78,7 @@ const patchUpdateTask = async (req, res, next) => {
         completed
       }
     )
-    await updateTask.save()
+
     res.json({ message: 'task updated' })
   } catch (error) {
     next(error)
@@ -88,8 +88,8 @@ const patchUpdateTask = async (req, res, next) => {
 const deleteTaskById = async (req, res, next) => {
   try {
     const taskId = req.params.id
-    const deleteTask = await taskModel.findByIdAndDelete(taskId)
-    await deleteTask.save()
+    await taskModel.findByIdAndDelete(taskId)
+
     res.json({ message: 'task deleted' })
   } catch (error) {
     next(error)
@@ -107,7 +107,7 @@ const postMessageToTask = async (req, res, next) => {
     const newMessage = await messageModel.create({
       title,
       content,
-      author: user.userName
+      author: user.username
     })
     await newMessage.save()
 
@@ -125,10 +125,11 @@ const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
 
-    const messages = await taskModel.findById(taskId, 'messages').populate({
-      path: 'Message',
+    const data = await taskModel.findById(taskId, 'messages').populate({
+      path: 'messages',
       options: { limit: 2, sort: { created: -1 }, skip: 0 } //created: -1 or 0
     })
+    const { messages } = data
     res.json(messages)
   } catch (error) {
     next(error)
@@ -138,8 +139,16 @@ const getAllMessagesFromTask = async (req, res, next) => {
 const deleteMessage = async (req, res, next) => {
   try {
     const { messageId } = req.body
-    const deleteMessage = await messageModel.findByIdAndDelete(messageId)
-    await deleteMessage.save()
+    const taskId = req.params.id
+
+    const task = await taskModel.findById(taskId).populate('messages')
+
+    await task.authAuthor(req.user.id, messageId)
+
+    task.messages.pull({ _id: messageId })
+    await task.save()
+
+    await messageModel.findByIdAndDelete(messageId)
 
     res.json({ message: 'message deleted' })
   } catch (error) {

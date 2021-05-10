@@ -10,8 +10,8 @@ const userSchema = new Schema(
       type: String,
       enum: ['client', 'admin', 'worker'],
       default: 'worker'
-    }
-    //tasks: [{type: mongoose.Types.ObjectId, ref: 'Task'}]
+    },
+    tasks: [{ type: mongoose.Types.ObjectId, ref: 'Task' }]
   },
   { timestamps: true }
 )

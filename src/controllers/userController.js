@@ -20,7 +20,7 @@ const signIn = async (req, res) => {
   if (!userModel.comparePassword(password, findUser.password)) {
     return res.json({ message: 'Username or password is incorrect' })
   }
-  const payload = { username: findUser._id, role: findUser.role }
+  const payload = { id: findUser._id, role: findUser.role }
   const token = jwt.sign(payload, JWT_SECRET)
   res.json({ data: findUser, token: token })
 }

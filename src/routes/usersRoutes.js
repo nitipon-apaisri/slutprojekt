@@ -6,7 +6,8 @@ const router = Router()
 router.get(
   '/users',
   authMiddleware.authorization,
-  authMiddleware.workerAndAdminAccess
+  authMiddleware.workerAndAdminAccess,
+  userController.signIn
 )
 router.post(
   '/users',
