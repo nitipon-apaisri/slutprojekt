@@ -30,6 +30,12 @@ const listUsers = async (req, res) => {
   res.json({ data: findUsers })
 }
 
+const getUserById = async (req, res) => {
+  const id = req.params.id
+  const findAnUser = await userModel.findById({ _id: id })
+  res.json({ data: findAnUser })
+}
+
 const updateUser = async (req, res) => {
   const id = req.params.id
   const changeInfo = req.body
@@ -60,5 +66,6 @@ module.exports = {
   signIn,
   updateUser,
   deleteUser,
-  listUsers
+  listUsers,
+  getUserById
 }
