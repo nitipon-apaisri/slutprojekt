@@ -1,3 +1,4 @@
+const { json } = require('express')
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
@@ -26,8 +27,40 @@ const signIn = async (req, res) => {
 }
 
 const listUsers = async (req, res) => {
-  const findUsers = await userModel.find()
-  res.json({ data: findUsers })
+  const role = req.query.role
+  const search = req.query.search
+  const requestQuery = req.query
+  if (Object.keys(requestQuery).length === 0) {
+    const findUsers = await userModel.find()
+    res.json({ data: findUsers })
+  } else {
+    if (Object.keys(requestQuery) == 'role') {
+      if (role.length === 0) {
+        res.status(400).json({ message: 'Invalid params' })
+      } else {
+        if (role === 'all') {
+          const findUsers = await userModel.find()
+          res.json({ data: findUsers })
+        } else {
+          const findUsers = await userModel.find({ role: role })
+          res.json({ data: findUsers })
+        }
+      }
+    }
+    if (Object.keys(requestQuery) == 'search') {
+      if (search === undefined) {
+        const findUsers = await userModel.find()
+        res.json({ data: findUsers })
+      } else {
+        if (search.length === 0) {
+          res.status(400).json({ message: 'Invalid params' })
+        } else {
+          const findUsers = await userModel.find({ username: search })
+          res.json({ data: findUsers })
+        }
+      }
+    }
+  }
 }
 
 const getMe = async (req, res) => {
