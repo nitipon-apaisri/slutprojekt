@@ -46,18 +46,17 @@ router.patch(
   authMiddleware.authorization,
   authMiddleware.workerAndClientAccess
 )
-router.delete(
-  '/tasks/:id/messages',
-  authMiddleware.authorization,
-  authMiddleware.workerAndClientAccess,
-  taskController.deleteMessage
-)
-
 router.post(
   '/tasks/:id/messages',
   authMiddleware.authorization,
   authMiddleware.workerAndClientAccess,
   taskController.postMessageToTask
+)
+router.delete(
+  '/tasks/:id/messages/:msg_id',
+  authMiddleware.authorization,
+  authMiddleware.workerAndClientAccess,
+  taskController.deleteMessage
 )
 
 router.post(
