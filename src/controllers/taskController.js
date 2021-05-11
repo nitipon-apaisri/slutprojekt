@@ -9,8 +9,7 @@ const notFound = require('../models/errors/notFound')
 const { NotFoundError } = notFound
 
 const unauthorized = require('../models/errors/unauthorized')
-const { usersRoutes } = require('../routes')
-const { Unauthorized } = unauthorized
+const { UnauthorizedError } = unauthorized
 
 const postCreateTask = async (req, res, next) => {
   try {
@@ -80,7 +79,7 @@ const getTaskById = async (req, res, next) => {
       const clientHasTask = client.tasks.find(t => t == taskId)
 
       if (!clientHasTask) {
-        throw new Unauthorized(
+        throw new UnauthorizedError(
           unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
         )
       }
@@ -149,7 +148,9 @@ const postMessageToTask = async (req, res, next) => {
     }
     const userHasTask = user.tasks.find(t => t == taskId)
     if (!userHasTask) {
-      throw new Unauthorized(unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS)
+      throw new UnauthorizedError(
+        unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+      )
     }
 
     const newMessage = await messageModel.create({
@@ -187,7 +188,7 @@ const getAllMessagesFromTask = async (req, res, next) => {
       const clientHasTask = client.tasks.find(t => t == taskId)
 
       if (!clientHasTask) {
-        throw new Unauthorized(
+        throw new UnauthorizedError(
           unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
         )
       }

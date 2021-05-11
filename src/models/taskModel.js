@@ -1,11 +1,12 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose
 const userModel = require('./userModel')
+
 const notFound = require('./errors/notFound')
 const { NotFoundError } = notFound
 
 const unauthorized = require('./errors/unauthorized')
-const { Unauthorized } = unauthorized
+const { UnauthorizedError } = unauthorized
 
 const taskSchema = new Schema(
   {
@@ -46,7 +47,9 @@ taskSchema.methods.authAuthor = async function (userId, messageId) {
     throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGE)
   }
   if (message.author !== user.username) {
-    throw new Unauthorized(unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS)
+    throw new UnauthorizedError(
+      unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+    )
   }
 }
 
