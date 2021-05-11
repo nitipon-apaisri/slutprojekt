@@ -2,11 +2,26 @@ const taskModel = require('../models/taskModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
 
+const invalidBody = require('../models/errors/invalidBody')
+const { InvalidBodyError } = invalidBody
+
+const notFound = require('../models/errors/notFound')
+const { NotFoundError } = notFound
+
 const postCreateTask = async (req, res, next) => {
   try {
     const { user } = req
     const { title, info, clientId } = req.body
+
+    if (!(title && info && clientId)) {
+      throw new InvalidBodyError(invalidBody.ErrorMessage.POST_TASK_BODY)
+    }
+
     const client = await userModel.findById(clientId)
+
+    if (!client) {
+      throw new NotFoundError(notFound.ErrorMessage.CLIENT_ID)
+    }
 
     const newTask = await taskModel.create({
       title,
@@ -22,7 +37,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ client, existingUser, newTask })
+    res.json({ newTask })
   } catch (error) {
     next(error)
   }
@@ -50,15 +65,21 @@ const getTaskById = async (req, res, next) => {
     const taskId = req.params.id
 
     const { role, id } = req.user
+
+    let task = null
     if (role === 'client') {
       const client = await userModel.findById(id).populate('tasks')
       const tasks = client.tasks
-      const task = tasks.find(t => t._id == taskId)
-      res.json(task)
+      task = tasks.find(t => t._id == taskId)
     } else {
-      const task = await taskModel.findById(taskId)
-      res.json(task)
+      task = await taskModel.findById(taskId)
     }
+
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
+
+    res.json(task)
   } catch (error) {
     next(error)
   }
