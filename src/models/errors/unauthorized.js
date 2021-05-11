@@ -6,13 +6,13 @@ const ErrorMessage = {
   FORBIDDEN_INVALID_ACCESS: 'unauthorized, invalid access'
 }
 
-class Unauthorized extends BaseError {
+class UnauthorizedError extends BaseError {
   constructor(message) {
     super(message, 403)
   }
 }
 
 module.exports = {
-  Unauthorized,
+  UnauthorizedError,
   ErrorMessage
 }

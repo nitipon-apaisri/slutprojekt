@@ -1,12 +1,13 @@
 const { Router } = require('express')
 const authMiddleware = require('../middlewares/auth')
+const authAccess = require('../middlewares/userAccess')
 const userController = require('../controllers/userController')
 const router = Router()
 
 router.get(
   '/users',
   authMiddleware.authorization,
-  authMiddleware.workerAndAdminAccess,
+  authAccess.workerAndAdminAccess,
   userController.listUsers
 )
 router.get(
@@ -17,19 +18,19 @@ router.get(
 router.post(
   '/users',
   authMiddleware.authorization,
-  authMiddleware.adminAccess,
+  authAccess.adminAccess,
   userController.createUser
 )
 router.patch(
   '/users/:id',
   authMiddleware.authorization,
-  authMiddleware.adminAccess,
+  authAccess.adminAccess,
   userController.updateUser
 )
 router.delete(
   '/users/:id',
   authMiddleware.authorization,
-  authMiddleware.adminAccess,
+  authAccess.adminAccess,
   userController.deleteUser
 )
 
