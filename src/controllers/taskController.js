@@ -2,11 +2,30 @@ const taskModel = require('../models/taskModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
 
+const invalidBody = require('../models/errors/invalidBody')
+const { InvalidBodyError } = invalidBody
+
+const notFound = require('../models/errors/notFound')
+const { NotFoundError } = notFound
+
+const unauthorized = require('../models/errors/unauthorized')
+const { usersRoutes } = require('../routes')
+const { Unauthorized } = unauthorized
+
 const postCreateTask = async (req, res, next) => {
   try {
     const { user } = req
     const { title, info, clientId } = req.body
+
+    if (!(title && info && clientId)) {
+      throw new InvalidBodyError(invalidBody.ErrorMessage.POST_TASK)
+    }
+
     const client = await userModel.findById(clientId)
+
+    if (!client) {
+      throw new NotFoundError(notFound.ErrorMessage.CLIENT_ID)
+    }
 
     const newTask = await taskModel.create({
       title,
@@ -22,7 +41,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ client, existingUser, newTask })
+    res.json({ newTask })
   } catch (error) {
     next(error)
   }
@@ -50,15 +69,23 @@ const getTaskById = async (req, res, next) => {
     const taskId = req.params.id
 
     const { role, id } = req.user
-    if (role === 'client') {
-      const client = await userModel.findById(id).populate('tasks')
-      const tasks = client.tasks
-      const task = tasks.find(t => t._id == taskId)
-      res.json(task)
-    } else {
-      const task = await taskModel.findById(taskId)
-      res.json(task)
+
+    const task = await taskModel.findById(taskId)
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }
+
+    if (role === 'client') {
+      const client = await userModel.findById(id)
+      const clientHasTask = client.tasks.find(t => t == taskId)
+
+      if (!clientHasTask) {
+        throw new Unauthorized(
+          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+        )
+      }
+    }
+    res.json(task)
   } catch (error) {
     next(error)
   }
@@ -66,20 +93,24 @@ const getTaskById = async (req, res, next) => {
 
 const patchUpdateTask = async (req, res, next) => {
   try {
-    const taskId = req.params.id
-    const { title, info, clientId, completed } = req.body
+    const { id } = req.params
+    const query = req.body
 
-    await taskModel.updateOne(
-      { _id: taskId },
-      {
-        title,
-        info,
-        clientId,
-        completed
-      }
-    )
+    if (!Object.keys(query).length) {
+      throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
+    }
 
-    res.json({ message: 'task updated' })
+    if (!(query.title || query.info || query.client || query.completed)) {
+      throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
+    }
+
+    const task = await taskModel.findByIdAndUpdate(id, query)
+
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
+
+    res.json({ message: 'task updated', task })
   } catch (error) {
     next(error)
   }
@@ -87,8 +118,13 @@ const patchUpdateTask = async (req, res, next) => {
 
 const deleteTaskById = async (req, res, next) => {
   try {
-    const taskId = req.params.id
-    await taskModel.findByIdAndDelete(taskId)
+    const { id } = req.params
+
+    const task = await taskModel.findByIdAndDelete(id)
+
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
 
     res.json({ message: 'task deleted' })
   } catch (error) {
@@ -101,8 +137,20 @@ const postMessageToTask = async (req, res, next) => {
     const userId = req.user.id
     const taskId = req.params.id
     const { title, content } = req.body
+    if (!(title && content)) {
+      throw new InvalidBodyError(invalidBody.ErrorMessage.TASK_MESSAGE)
+    }
 
     const user = await userModel.findById(userId)
+    const task = await taskModel.findById(taskId)
+
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
+    const userHasTask = user.tasks.find(t => t == taskId)
+    if (!userHasTask) {
+      throw new Unauthorized(unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS)
+    }
 
     const newMessage = await messageModel.create({
       title,
@@ -111,7 +159,6 @@ const postMessageToTask = async (req, res, next) => {
     })
     await newMessage.save()
 
-    const task = await taskModel.findById(taskId)
     task.messages.push(newMessage)
     await task.save()
 
@@ -124,13 +171,29 @@ const postMessageToTask = async (req, res, next) => {
 const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
+    const { role, id } = req.user
 
     const data = await taskModel.findById(taskId, 'messages').populate({
       path: 'messages',
       options: { limit: 2, sort: { created: -1 }, skip: 0 } //created: -1 or 0
     })
-    const { messages } = data
-    res.json(messages)
+
+    if (!data) {
+      throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGES)
+    }
+
+    if (role === 'client') {
+      const client = await userModel.findById(id)
+      const clientHasTask = client.tasks.find(t => t == taskId)
+
+      if (!clientHasTask) {
+        throw new Unauthorized(
+          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+        )
+      }
+    }
+
+    res.json(data.messages)
   } catch (error) {
     next(error)
   }
@@ -138,10 +201,14 @@ const getAllMessagesFromTask = async (req, res, next) => {
 
 const deleteMessage = async (req, res, next) => {
   try {
-    const { messageId } = req.body
     const taskId = req.params.id
+    const messageId = req.params.msg_id
 
     const task = await taskModel.findById(taskId).populate('messages')
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
+
     await task.authAuthor(req.user.id, messageId)
     task.messages.pull({ _id: messageId })
     await task.save()
@@ -159,6 +226,9 @@ const postTaskImage = async (req, res, next) => {
   const { buffer } = req.file
   try {
     const task = await taskModel.findById(id)
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
     task.image = buffer
     task.save()
     res.json({ message: 'success', task })
