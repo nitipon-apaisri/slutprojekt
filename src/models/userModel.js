@@ -15,8 +15,8 @@ const userSchema = new Schema(
       firstName: String,
       lastName: String,
       age: Number
-    }
-    //tasks: [{type: mongoose.Types.ObjectId, ref: 'Task'}]
+    },
+    tasks: [{ type: mongoose.Types.ObjectId, ref: 'Task' }]
   },
   { timestamps: true }
 )

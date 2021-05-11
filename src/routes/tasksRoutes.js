@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const authMiddleware = require('../middlewares/auth')
+const { imageOnlyUpload, UploadKey } = require('../configs/fileUpload')
 const taskController = require('../controllers/taskController')
 
 const router = Router()
@@ -57,6 +58,14 @@ router.post(
   authMiddleware.authorization,
   authMiddleware.workerAndClientAccess,
   taskController.postMessageToTask
+)
+
+router.post(
+  '/tasks/:id/image',
+  authMiddleware.authorization,
+  authMiddleware.workerAccess,
+  imageOnlyUpload.single(UploadKey.IMAGE_UPLOAD),
+  taskController.postTaskImage
 )
 
 module.exports = router
