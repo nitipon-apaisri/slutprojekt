@@ -48,6 +48,8 @@ const updateMe = async (req, res) => {
   } else {
     return res.status(400).json({ message: 'No body provide' })
   }
+  const findUser = await userModel.findById({ _id: userId })
+  res.json({ message: findUser })
 }
 
 const getUserById = async (req, res) => {
@@ -63,7 +65,6 @@ const updateUser = async (req, res) => {
     await userModel.updateOne({ _id: id }, changeInfo, {
       new: true
     })
-    res.json({ message: 'Update successful' })
   } else {
     return res.status(400).json({ message: 'No body provide' })
   }
