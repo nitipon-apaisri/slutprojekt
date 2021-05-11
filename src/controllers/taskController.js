@@ -142,15 +142,26 @@ const deleteMessage = async (req, res, next) => {
     const taskId = req.params.id
 
     const task = await taskModel.findById(taskId).populate('messages')
-
     await task.authAuthor(req.user.id, messageId)
-
     task.messages.pull({ _id: messageId })
     await task.save()
 
     await messageModel.findByIdAndDelete(messageId)
 
     res.json({ message: 'message deleted' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const postTaskImage = async (req, res, next) => {
+  const { id } = req.params
+  const { buffer } = req.file
+  try {
+    const task = await taskModel.findById(id)
+    task.image = buffer
+    task.save()
+    res.json({ message: 'success', task })
   } catch (error) {
     next(error)
   }
@@ -164,5 +175,6 @@ module.exports = {
   deleteTaskById,
   getAllMessagesFromTask,
   postMessageToTask,
-  deleteMessage
+  deleteMessage,
+  postTaskImage
 }

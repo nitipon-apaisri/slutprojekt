@@ -63,17 +63,9 @@ router.post(
 router.post(
   '/tasks/:id/image',
   authMiddleware.authorization,
+  authMiddleware.workerAccess,
   imageOnlyUpload.single(UploadKey.IMAGE_UPLOAD),
-  (req, res, next) => {
-    const { id } = req.params
-    const { buffer } = req.file
-
-    const task = taskModel.findByIdAndUpdate(id, {
-      $set: { image: Buffer.from(buffer) }
-    })
-    console.log(task)
-    res.json({ message: 'success', task })
-  }
+  taskController.postTaskImage
 )
 
 module.exports = router
