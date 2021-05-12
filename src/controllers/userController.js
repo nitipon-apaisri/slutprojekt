@@ -1,29 +1,39 @@
-const { json } = require('express')
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
-
+const authErr = require('../models/errors/authenticate')
+const bodyErr = require('../models/errors/invalidBody')
 const createUser = async (req, res) => {
   const { username, password, role, profile } = req.body
-  const newUser = await userModel({
-    username: username,
-    password: password,
-    role: role,
-    profile: profile
-  })
-  await newUser.save()
-  res.json({ message: 'Success', data: newUser })
+  if (!username || !password) {
+    res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
+  } else {
+    const newUser = await userModel({
+      username: username,
+      password: password,
+      role: role,
+      profile: profile
+    })
+    await newUser.save()
+    res.json({ message: 'Success', data: newUser })
+  }
 }
 
 const signIn = async (req, res) => {
   const { username, password } = req.body
-  const findUser = await userModel.findOne({ username })
-  if (!userModel.comparePassword(password, findUser.password)) {
-    return res.json({ message: 'Username or password is incorrect' })
+  if (!username || !password) {
+    res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
+  } else {
+    const findUser = await userModel.findOne({ username })
+    if (!userModel.comparePassword(password, findUser.password)) {
+      return res
+        .status(401)
+        .json({ message: authErr.ErrorMessage.USERNAME_PASSWORD })
+    }
+    const payload = { id: findUser._id, role: findUser.role }
+    const token = jwt.sign(payload, JWT_SECRET)
+    res.json({ data: findUser, token: token })
   }
-  const payload = { id: findUser._id, role: findUser.role }
-  const token = jwt.sign(payload, JWT_SECRET)
-  res.json({ data: findUser, token: token })
 }
 
 const listUsers = async (req, res) => {
@@ -78,7 +88,7 @@ const updateMe = async (req, res) => {
     })
     res.json({ message: 'Update successful' })
   } else {
-    return res.status(400).json({ message: 'No body provide' })
+    return res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
   }
   const findUser = await userModel.findById({ _id: userId })
   res.json({ message: findUser })
@@ -98,7 +108,7 @@ const updateUser = async (req, res) => {
       new: true
     })
   } else {
-    return res.status(400).json({ message: 'No body provide' })
+    return res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
   }
   const findUser = await userModel.findById({ _id: id })
   res.json({ message: findUser })
