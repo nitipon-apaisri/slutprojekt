@@ -1,7 +1,8 @@
 const BaseError = require('./base')
 
 const ErrorMessage = {
-  USERNAME_PASSWORD: 'username and password needs to be provided'
+  USERNAME_PASSWORD: 'username and password needs to be provided',
+  BODY: 'Invalid body'
 }
 
 class InvalidBodyError extends BaseError {
