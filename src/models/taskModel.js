@@ -33,7 +33,8 @@ const taskSchema = new Schema(
         type: mongoose.Types.ObjectId,
         ref: 'Message'
       }
-    ]
+    ],
+    errorReports: [{ type: mongoose.Types.ObjectId, ref: 'ErrorReport' }]
   },
   { timestamps: true }
 )

@@ -30,9 +30,13 @@ const workerAndAdminAccess = (req, res, next) =>
 const adminAccess = (req, res, next) =>
   hasRole(req.user.role, Role.ADMIN) ? next() : authInvalidAccessError()
 
+const clientAccess = (req, res, next) =>
+  hasRole(req.user.role, Role.CLIENT) ? next() : authInvalidAccessError()
+
 module.exports = {
   workerAccess,
   workerAndClientAccess,
   workerAndAdminAccess,
-  adminAccess
+  adminAccess,
+  clientAccess
 }

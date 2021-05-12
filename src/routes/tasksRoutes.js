@@ -68,4 +68,10 @@ router.post(
   taskController.postTaskImage
 )
 
+router.post(
+  '/tasks/:id/error_reports',
+  authMiddleware.authorization,
+  authAccess.clientAccess,
+  taskController.postReport
+)
 module.exports = router

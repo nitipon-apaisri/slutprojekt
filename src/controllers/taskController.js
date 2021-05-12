@@ -1,4 +1,5 @@
 const taskModel = require('../models/taskModel')
+const reportModel = require('../models/reportModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
 
@@ -238,6 +239,28 @@ const postTaskImage = async (req, res, next) => {
   }
 }
 
+const postReport = async (req, res, next) => {
+  const id = req.params.id
+  const { title, content, img } = req.body
+  try {
+    const task = await taskModel.findById(id)
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    } else {
+      const newReport = await reportModel.create({ title, content })
+      const existingTasks = await taskModel.findById({
+        _id: id
+      })
+      await newReport.save()
+      existingTasks.errorReports.push(newReport)
+      await existingTasks.save()
+      res.json({ report: newReport, updated: existingTasks })
+    }
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   postCreateTask,
   getTasks,
@@ -247,5 +270,6 @@ module.exports = {
   getAllMessagesFromTask,
   postMessageToTask,
   deleteMessage,
-  postTaskImage
+  postTaskImage,
+  postReport
 }
