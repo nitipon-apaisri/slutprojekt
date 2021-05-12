@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const alreadyExistsError = require('./errors/alreadyExists')
+const authenticateError = require('./errors/authenticate')
+
+const { AuthenticateError } = authenticateError
 const { AlreadyExistsError } = alreadyExistsError
 const { Schema } = mongoose
 
@@ -54,8 +57,16 @@ userSchema.statics.validateCreateUser = async function (query) {
   return await this.create({ ...query, tasks: [], profile: {} })
 }
 
-userSchema.static('comparePassword', (password, userPassword) => {
-  return bcrypt.compareSync(password, userPassword)
-})
+userSchema.statics.validateUser = async function (username, password) {
+  const user = await this.findOne({ username })
+
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    throw new AuthenticateError(
+      authenticateError.ErrorMessage.USERNAME_PASSWORD,
+      409
+    )
+  }
+  return user
+}
 const user = mongoose.model('User', userSchema)
 module.exports = user

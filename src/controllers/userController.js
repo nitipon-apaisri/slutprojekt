@@ -18,20 +18,20 @@ const createUser = async (req, res, next) => {
   }
 }
 
-const signIn = async (req, res) => {
+const signIn = async (req, res, next) => {
   const { username, password } = req.body
-  if (!username || !password) {
-    res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
-  } else {
-    const findUser = await userModel.findOne({ username })
-    if (!userModel.comparePassword(password, findUser.password)) {
-      return res
-        .status(401)
-        .json({ message: authErr.ErrorMessage.USERNAME_PASSWORD })
+
+  try {
+    if (!username || !password) {
+      throw new bodyErr(bodyErr.ErrorMessage.USERNAME_PASSWORD)
     }
-    const payload = { id: findUser._id, role: findUser.role }
+    const user = await userModel.validateUser(username, password)
+
+    const payload = { id: user._id, role: user.role }
     const token = jwt.sign(payload, JWT_SECRET)
-    res.json({ data: findUser, token: token })
+    res.json({ message: 'success', token: token })
+  } catch (error) {
+    next(error)
   }
 }
 
