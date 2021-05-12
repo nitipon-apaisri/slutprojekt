@@ -3,19 +3,18 @@ const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
 const authErr = require('../models/errors/authenticate')
 const bodyErr = require('../models/errors/invalidBody')
-const createUser = async (req, res) => {
-  const { username, password, role, profile } = req.body
-  if (!username || !password) {
-    res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
-  } else {
-    const newUser = await userModel({
-      username: username,
-      password: password,
-      role: role,
-      profile: profile
-    })
+const createUser = async (req, res, next) => {
+  const query = req.body
+  try {
+    if (!query.username || !query.password) {
+      throw new bodyErr.InvalidBodyError(bodyErr.ErrorMessage.USERNAME_PASSWORD)
+    }
+
+    const newUser = await userModel.validateCreateUser(query)
     await newUser.save()
-    res.json({ message: 'Success', data: newUser })
+    res.json({ message: 'success' })
+  } catch (error) {
+    next(error)
   }
 }
 
