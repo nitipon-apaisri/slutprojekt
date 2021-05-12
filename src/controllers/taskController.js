@@ -10,6 +10,7 @@ const notFound = require('../models/errors/notFound')
 const { NotFoundError } = notFound
 
 const unauthorized = require('../models/errors/unauthorized')
+const { report } = require('../routes/usersRoutes')
 const { UnauthorizedError } = unauthorized
 
 const postCreateTask = async (req, res, next) => {
@@ -261,6 +262,28 @@ const postReport = async (req, res, next) => {
   }
 }
 
+const getReport = async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const task = await taskModel.findById(id)
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    } else {
+      const reports = task.errorReports
+      let reportsInfo = []
+      reports.forEach(async report => {
+        let theReport = await reportModel.findById(report)
+        reportsInfo.push(theReport)
+      })
+      setTimeout(() => {
+        res.json({ user: task, data: reportsInfo })
+      }, 300)
+    }
+  } catch (err) {
+    next(err)
+  }
+}
+
 module.exports = {
   postCreateTask,
   getTasks,
@@ -271,5 +294,6 @@ module.exports = {
   postMessageToTask,
   deleteMessage,
   postTaskImage,
-  postReport
+  postReport,
+  getReport
 }

@@ -74,4 +74,12 @@ router.post(
   authAccess.clientAccess,
   taskController.postReport
 )
+
+router.get(
+  '/tasks/:id/error_reports',
+  authMiddleware.authorization,
+  authAccess.workerAndClientAccess,
+  taskController.getReport
+)
+
 module.exports = router
