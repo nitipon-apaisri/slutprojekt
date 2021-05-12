@@ -8,9 +8,6 @@ const { InvalidBodyError } = invalidBody
 const notFound = require('../models/errors/notFound')
 const { NotFoundError } = notFound
 
-const unauthorized = require('../models/errors/unauthorized')
-const { UnauthorizedError } = unauthorized
-
 const postCreateTask = async (req, res, next) => {
   try {
     const { user } = req
@@ -75,15 +72,9 @@ const getTaskById = async (req, res, next) => {
     }
 
     if (role === 'client') {
-      const client = await userModel.findById(id)
-      const clientHasTask = client.tasks.find(t => t == taskId)
-
-      if (!clientHasTask) {
-        throw new UnauthorizedError(
-          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-        )
-      }
+      await task.authTaskAccess(id, taskId)
     }
+
     res.json(task)
   } catch (error) {
     next(error)
@@ -146,12 +137,8 @@ const postMessageToTask = async (req, res, next) => {
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }
-    const userHasTask = user.tasks.find(t => t == taskId)
-    if (!userHasTask) {
-      throw new UnauthorizedError(
-        unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-      )
-    }
+
+    await task.authTaskAccess(userId, taskId)
 
     const newMessage = await messageModel.create({
       title,
@@ -173,10 +160,11 @@ const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
     const { role, id } = req.user
+    const { limit = 2, page = 1 } = req.query
 
     const data = await taskModel.findById(taskId, 'messages').populate({
       path: 'messages',
-      options: { limit: 2, sort: { created: -1 }, skip: 0 } //created: -1 or 0
+      options: { limit, sort: { createdAt: -1 }, skip: limit * (page - 1) }
     })
 
     if (!data) {
@@ -184,14 +172,7 @@ const getAllMessagesFromTask = async (req, res, next) => {
     }
 
     if (role === 'client') {
-      const client = await userModel.findById(id)
-      const clientHasTask = client.tasks.find(t => t == taskId)
-
-      if (!clientHasTask) {
-        throw new UnauthorizedError(
-          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-        )
-      }
+      await data.authTaskAccess(id, taskId)
     }
 
     res.json(data.messages)

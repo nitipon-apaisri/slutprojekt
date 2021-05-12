@@ -53,6 +53,17 @@ taskSchema.methods.authAuthor = async function (userId, messageId) {
   }
 }
 
+taskSchema.methods.authTaskAccess = async function (userId, taskId) {
+  const user = await userModel.findById(userId)
+  const userHasTask = user.tasks.find(t => t == taskId)
+
+  if (!userHasTask) {
+    throw new UnauthorizedError(
+      unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+    )
+  }
+}
+
 const Task = mongoose.model('Task', taskSchema)
 
 module.exports = Task
