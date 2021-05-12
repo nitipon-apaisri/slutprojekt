@@ -37,7 +37,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ newTask })
+    res.json({ data: newTask.toObject() })
   } catch (error) {
     next(error)
   }
@@ -54,7 +54,8 @@ const getTasks = async (req, res, next) => {
     if (filter === 'done') {
       tasks = tasks.filter(t => t.completed === 'done')
     }
-    res.json(tasks)
+    const data = tasks.map(task => task.toObject())
+    res.json(data)
   } catch (error) {
     next(error)
   }
@@ -75,7 +76,8 @@ const getTaskById = async (req, res, next) => {
       await task.authTaskAccess(id, taskId)
     }
 
-    res.json(task)
+    const data = task.toObject()
+    res.json(data)
   } catch (error) {
     next(error)
   }
@@ -103,7 +105,7 @@ const patchUpdateTask = async (req, res, next) => {
 
     await task.authTaskAccess(user.id, taskId)
 
-    res.json({ message: 'task updated', task })
+    res.json({ message: 'task updated' })
   } catch (error) {
     next(error)
   }
@@ -162,21 +164,22 @@ const postMessageToTask = async (req, res, next) => {
 const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
-    const { role, id } = req.user
+    const { id } = req.user
     const { limit = 2, page = 1 } = req.query
 
-    const data = await taskModel.findById(taskId, 'messages').populate({
+    const task = await taskModel.findById(taskId, 'messages').populate({
       path: 'messages',
       options: { limit, sort: { createdAt: -1 }, skip: limit * (page - 1) }
     })
 
-    if (!data) {
+    if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGES)
     }
 
-    await data.authTaskAccess(id, taskId)
+    await task.authTaskAccess(id, taskId)
 
-    res.json(data.messages)
+    const data = task.messagesToObject()
+    res.json(data)
   } catch (error) {
     next(error)
   }
@@ -214,7 +217,7 @@ const postTaskImage = async (req, res, next) => {
     }
     task.image = buffer
     task.save()
-    res.json({ message: 'success', task })
+    res.json({ data: task.image, message: 'success' })
   } catch (error) {
     next(error)
   }

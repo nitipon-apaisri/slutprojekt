@@ -16,7 +16,14 @@ const messageSchema = new Schema(
       required: [true, 'message must have an author']
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toObject: {
+      transform(_, message) {
+        delete message.__v
+      }
+    }
+  }
 )
 
 const Message = mongoose.model('Message', messageSchema)

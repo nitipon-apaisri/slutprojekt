@@ -35,7 +35,14 @@ const taskSchema = new Schema(
       }
     ]
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toObject: {
+      transform(_, task) {
+        delete task.__v
+      }
+    }
+  }
 )
 
 taskSchema.methods.authAuthor = async function (userId, messageId) {
@@ -62,6 +69,10 @@ taskSchema.methods.authTaskAccess = async function (userId, taskId) {
       unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
     )
   }
+}
+
+taskSchema.methods.messagesToObject = function () {
+  return this.messages.map(message => message.toObject())
 }
 
 const Task = mongoose.model('Task', taskSchema)
