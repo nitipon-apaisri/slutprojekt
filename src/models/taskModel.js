@@ -1,7 +1,12 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose
-const messageModel = require('./messageModel')
 const userModel = require('./userModel')
+
+const notFound = require('./errors/notFound')
+const { NotFoundError } = notFound
+
+const unauthorized = require('./errors/unauthorized')
+const { UnauthorizedError } = unauthorized
 
 const taskSchema = new Schema(
   {
@@ -39,10 +44,12 @@ taskSchema.methods.authAuthor = async function (userId, messageId) {
   const message = task.messages.find(message => message._id == messageId)
 
   if (!message) {
-    throw new Error('message not found')
+    throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGE)
   }
   if (message.author !== user.username) {
-    throw new Error('only the author can delete the message')
+    throw new UnauthorizedError(
+      unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+    )
   }
 }
 
