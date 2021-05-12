@@ -1,10 +1,17 @@
 const multer = require('multer')
-const { FileSize, Validation, UploadKey } = require('./fileUpload.utils')
+const {
+  FileSize,
+  Validation,
+  UploadKey,
+  imageStorage
+} = require('./fileUpload.utils')
+
 const fileUploadError = require('../../models/errors/fileUpload')
 const { FileUploadError } = fileUploadError
 
 const imageOnlyUpload = multer({
   limits: { fileSize: FileSize.IMAGE },
+  storage: imageStorage,
   fileFilter(req, file, cb) {
     if (!file.originalname.match(Validation.IMAGE_EXT)) {
       return cb(
@@ -14,7 +21,6 @@ const imageOnlyUpload = multer({
     cb(undefined, true)
   }
 })
-
 module.exports = {
   imageOnlyUpload,
   UploadKey
