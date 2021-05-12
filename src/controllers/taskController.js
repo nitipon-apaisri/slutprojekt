@@ -83,8 +83,9 @@ const getTaskById = async (req, res, next) => {
 
 const patchUpdateTask = async (req, res, next) => {
   try {
-    const { id } = req.params
+    const taskId = req.params.id
     const query = req.body
+    const { user } = req
 
     if (!Object.keys(query).length) {
       throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
@@ -94,11 +95,13 @@ const patchUpdateTask = async (req, res, next) => {
       throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
     }
 
-    const task = await taskModel.findByIdAndUpdate(id, query)
+    const task = await taskModel.findByIdAndUpdate(taskId, query)
 
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }
+
+    await task.authTaskAccess(user.id, taskId)
 
     res.json({ message: 'task updated', task })
   } catch (error) {
@@ -171,9 +174,7 @@ const getAllMessagesFromTask = async (req, res, next) => {
       throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGES)
     }
 
-    if (role === 'client') {
-      await data.authTaskAccess(id, taskId)
-    }
+    await data.authTaskAccess(id, taskId)
 
     res.json(data.messages)
   } catch (error) {
