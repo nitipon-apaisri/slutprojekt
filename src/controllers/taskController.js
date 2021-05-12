@@ -224,14 +224,19 @@ const deleteMessage = async (req, res, next) => {
 
 const postTaskImage = async (req, res, next) => {
   const { id } = req.params
-  const { buffer } = req.file
+  const { path } = req.file
+
+  const filePath = path.replace('public/', '')
   try {
+    const fileUrl =
+      process.env.NODE_ENV === 'dev'
+        ? process.env.IMAGE_URL.replace('PORT', process.env.PORT).concat(
+            `/${filePath}`
+          )
+        : process.env.IMAGE_URL.concat(`/${filePath}`)
     const task = await taskModel.findById(id)
-    if (!task) {
-      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
-    }
-    task.image = buffer
-    task.save()
+    task.image = fileUrl
+    await task.save()
     res.json({ message: 'success', task })
   } catch (error) {
     next(error)
