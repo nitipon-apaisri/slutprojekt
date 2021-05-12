@@ -51,13 +51,13 @@ router.post(
   '/tasks/:id/messages',
   authMiddleware.authorization,
   authAccess.workerAndClientAccess,
-  taskController.deleteMessage
+  taskController.postMessageToTask
 )
 router.delete(
   '/tasks/:id/messages/:msg_id',
   authMiddleware.authorization,
   authAccess.workerAndClientAccess,
-  taskController.postMessageToTask
+  taskController.deleteMessage
 )
 
 router.post(

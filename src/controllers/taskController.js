@@ -8,9 +8,6 @@ const { InvalidBodyError } = invalidBody
 const notFound = require('../models/errors/notFound')
 const { NotFoundError } = notFound
 
-const unauthorized = require('../models/errors/unauthorized')
-const { UnauthorizedError } = unauthorized
-
 const postCreateTask = async (req, res, next) => {
   try {
     const { user } = req
@@ -40,7 +37,7 @@ const postCreateTask = async (req, res, next) => {
     await existingUser.save()
     await client.save()
 
-    res.json({ newTask })
+    res.json({ data: newTask.toObject() })
   } catch (error) {
     next(error)
   }
@@ -57,7 +54,8 @@ const getTasks = async (req, res, next) => {
     if (filter === 'done') {
       tasks = tasks.filter(t => t.completed === 'done')
     }
-    res.json(tasks)
+    const data = tasks.map(task => task.toObject())
+    res.json(data)
   } catch (error) {
     next(error)
   }
@@ -75,16 +73,11 @@ const getTaskById = async (req, res, next) => {
     }
 
     if (role === 'client') {
-      const client = await userModel.findById(id)
-      const clientHasTask = client.tasks.find(t => t == taskId)
-
-      if (!clientHasTask) {
-        throw new UnauthorizedError(
-          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-        )
-      }
+      await task.authTaskAccess(id, taskId)
     }
-    res.json(task)
+
+    const data = task.toObject()
+    res.json(data)
   } catch (error) {
     next(error)
   }
@@ -92,8 +85,9 @@ const getTaskById = async (req, res, next) => {
 
 const patchUpdateTask = async (req, res, next) => {
   try {
-    const { id } = req.params
+    const taskId = req.params.id
     const query = req.body
+    const { user } = req
 
     if (!Object.keys(query).length) {
       throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
@@ -103,13 +97,15 @@ const patchUpdateTask = async (req, res, next) => {
       throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
     }
 
-    const task = await taskModel.findByIdAndUpdate(id, query)
+    const task = await taskModel.findByIdAndUpdate(taskId, query)
 
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }
 
-    res.json({ message: 'task updated', task })
+    await task.authTaskAccess(user.id, taskId)
+
+    res.json({ message: 'task updated' })
   } catch (error) {
     next(error)
   }
@@ -146,12 +142,8 @@ const postMessageToTask = async (req, res, next) => {
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }
-    const userHasTask = user.tasks.find(t => t == taskId)
-    if (!userHasTask) {
-      throw new UnauthorizedError(
-        unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-      )
-    }
+
+    await task.authTaskAccess(userId, taskId)
 
     const newMessage = await messageModel.create({
       title,
@@ -172,29 +164,22 @@ const postMessageToTask = async (req, res, next) => {
 const getAllMessagesFromTask = async (req, res, next) => {
   try {
     const taskId = req.params.id
-    const { role, id } = req.user
+    const { id } = req.user
+    const { limit = 2, page = 1 } = req.query
 
-    const data = await taskModel.findById(taskId, 'messages').populate({
+    const task = await taskModel.findById(taskId, 'messages').populate({
       path: 'messages',
-      options: { limit: 2, sort: { created: -1 }, skip: 0 } //created: -1 or 0
+      options: { limit, sort: { createdAt: -1 }, skip: limit * (page - 1) }
     })
 
-    if (!data) {
+    if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.NO_MESSAGES)
     }
 
-    if (role === 'client') {
-      const client = await userModel.findById(id)
-      const clientHasTask = client.tasks.find(t => t == taskId)
+    await task.authTaskAccess(id, taskId)
 
-      if (!clientHasTask) {
-        throw new UnauthorizedError(
-          unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
-        )
-      }
-    }
-
-    res.json(data.messages)
+    const data = task.messagesToObject()
+    res.json(data)
   } catch (error) {
     next(error)
   }
