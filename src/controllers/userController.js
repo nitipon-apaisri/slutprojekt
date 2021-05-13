@@ -30,7 +30,7 @@ const signIn = async (req, res, next) => {
 
     const payload = { id: user._id, role: user.role }
     const token = jwt.sign(payload, JWT_SECRET)
-    res.json({ message: 'success', token: token })
+    res.json({ message: 'success', token })
   } catch (error) {
     next(error)
   }
