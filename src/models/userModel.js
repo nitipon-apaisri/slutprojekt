@@ -1,10 +1,12 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
-const alreadyExistsError = require('./errors/alreadyExists')
 const authenticateError = require('./errors/authenticate')
+const alreadyExistsError = require('./errors/alreadyExists')
+const notFoundError = require('./errors/notFound')
 
 const { AuthenticateError } = authenticateError
 const { AlreadyExistsError } = alreadyExistsError
+const { NotFoundError } = notFoundError
 const { Schema } = mongoose
 
 const userSchema = new Schema(
@@ -55,6 +57,14 @@ userSchema.statics.validateCreateUser = async function (query) {
     throw new AlreadyExistsError(alreadyExistsError.ErrorMessage.USER)
   }
   return await this.create({ ...query, tasks: [], profile: {} })
+}
+
+userSchema.statics.validateUpdateUser = async function (id, query) {
+  const user = await this.findByIdAndUpdate(id, query)
+  if (!user) {
+    throw new NotFoundError(notFoundError.ErrorMessage.USER_ID)
+  }
+  await user.save()
 }
 
 userSchema.statics.validateUser = async function (username, password) {

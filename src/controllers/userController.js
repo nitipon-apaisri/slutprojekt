@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
-const authErr = require('../models/errors/authenticate')
 const bodyErr = require('../models/errors/invalidBody')
+const notFoundErr = require('../models/errors/notFound')
+
 const createUser = async (req, res, next) => {
   const query = req.body
   try {
@@ -36,92 +37,95 @@ const signIn = async (req, res, next) => {
 }
 
 const listUsers = async (req, res) => {
-  const role = req.query.role
-  const search = req.query.search
-  const requestQuery = req.query
-  if (Object.keys(requestQuery).length === 0) {
-    const findUsers = await userModel.find()
-    res.json({ data: findUsers })
-  } else {
-    if (Object.keys(requestQuery) == 'role') {
-      if (role.length === 0) {
-        res.status(400).json({ message: 'Invalid params' })
-      } else {
-        if (role === 'all') {
-          const findUsers = await userModel.find()
-          res.json({ data: findUsers })
-        } else {
-          const findUsers = await userModel.find({ role: role })
-          res.json({ data: findUsers })
-        }
-      }
-    }
-    if (Object.keys(requestQuery) == 'search') {
-      if (search === undefined) {
-        const findUsers = await userModel.find()
-        res.json({ data: findUsers })
-      } else {
-        if (search.length === 0) {
-          res.status(400).json({ message: 'Invalid params' })
-        } else {
-          const findUsers = await userModel.find({ username: search })
-          res.json({ data: findUsers })
-        }
-      }
-    }
+  const { role, search } = req.query
+
+  let filter = {}
+
+  if (role && role !== 'all') {
+    filter.role = role
+  }
+  if (search) {
+    filter.username = search
+  }
+
+  const users = await userModel.find(filter)
+
+  const data = users.map(user => user.toObject())
+  res.json({ data })
+}
+
+const getMe = async (req, res, next) => {
+  const { id } = req.user
+  try {
+    const user = await userModel.findById(id)
+    res.json({ data: user.toObject() })
+  } catch (error) {
+    next(error)
   }
 }
 
-const getMe = async (req, res) => {
-  const userId = req.user.username
-  const findUser = await userModel.findById({ _id: userId })
-  res.json({ data: findUser })
-}
+const updateMe = async (req, res, next) => {
+  const { id } = req.user
+  const query = req.body
 
-const updateMe = async (req, res) => {
-  const userId = req.user.username
-  const changeInfo = req.body
-  if (Object.keys(changeInfo).length !== 0) {
-    await userModel.updateOne({ _id: userId }, changeInfo, {
+  try {
+    if (!Object.keys(query).length) {
+      throw new bodyErr.InvalidBodyError(bodyErr.ErrorMessage.BODY)
+    }
+    if (!(query.username || query.password || query.profile)) {
+      throw new bodyErr.InvalidBodyError(bodyErr.ErrorMessage.BODY)
+    }
+    await userModel.updateOne({ _id: id }, query, {
       new: true
     })
     res.json({ message: 'Update successful' })
-  } else {
-    return res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
+  } catch (error) {
+    next(error)
   }
-  const findUser = await userModel.findById({ _id: userId })
-  res.json({ message: findUser })
 }
 
-const getUserById = async (req, res) => {
-  const id = req.params.id
-  const findAnUser = await userModel.findById({ _id: id })
-  res.json({ data: findAnUser })
-}
-
-const updateUser = async (req, res) => {
-  const id = req.params.id
-  const changeInfo = req.body
-  if (Object.keys(changeInfo).length !== 0) {
-    await userModel.updateOne({ _id: id }, changeInfo, {
-      new: true
-    })
-  } else {
-    return res.status(400).json({ message: bodyErr.ErrorMessage.BODY })
-  }
-  const findUser = await userModel.findById({ _id: id })
-  res.json({ message: findUser })
-}
-
-const deleteUser = async (req, res) => {
-  const id = req.params.id
-  await userModel.deleteOne({ _id: id }, function (err) {
-    if (err) {
-      res.json({ message: err })
-    } else {
-      res.json({ message: 'Successful delation' })
+const getUserById = async (req, res, next) => {
+  const { id } = req.params
+  try {
+    const user = await userModel.findById(id)
+    if (!user) {
+      throw new notFoundErr.NotFoundError(notFoundErr.ErrorMessage.USER_ID)
     }
-  })
+    res.json({ data: user.toObject() })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const updateUser = async (req, res, next) => {
+  const { id } = req.params
+  const query = req.body
+  try {
+    if (!Object.keys(query).length) {
+      throw new bodyErr.InvalidBodyError(bodyErr.ErrorMessage.BODY)
+    }
+    if (!(query.username || query.role || query.profile)) {
+      throw new bodyErr.InvalidBodyError(bodyErr.ErrorMessage.BODY)
+    }
+    await userModel.validateUpdateUser(id, query)
+
+    res.json({ message: 'Update successful' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteUser = async (req, res, next) => {
+  const { id } = req.params
+  try {
+    const user = await userModel.findByIdAndDelete(id)
+    if (!user) {
+      throw new notFoundErr.NotFoundError(notFoundErr.ErrorMessage.USER_ID)
+    }
+    res.json({ message: 'Successfully deleted' })
+  } catch (error) {
+    next(error)
+  }
 }
 
 module.exports = {
