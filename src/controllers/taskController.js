@@ -220,9 +220,13 @@ const postTaskImage = async (req, res, next) => {
           )
         : process.env.IMAGE_URL.concat(`/${filePath}`)
     const task = await taskModel.findById(id)
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    }
     task.image = fileUrl
+
     await task.save()
-    res.json({ message: 'success', task })
+    res.json({ message: 'success', data: task.image })
   } catch (error) {
     next(error)
   }
