@@ -19,7 +19,7 @@ const taskSchema = new Schema(
       required: [true, 'Task must have a description.']
     },
     image: {
-      type: Buffer
+      type: String
     },
     client: {
       type: String
@@ -36,7 +36,14 @@ const taskSchema = new Schema(
     ],
     errorReports: [{ type: mongoose.Types.ObjectId, ref: 'report' }]
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toObject: {
+      transform(_, task) {
+        delete task.__v
+      }
+    }
+  }
 )
 
 taskSchema.methods.authAuthor = async function (userId, messageId) {
@@ -52,6 +59,21 @@ taskSchema.methods.authAuthor = async function (userId, messageId) {
       unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
     )
   }
+}
+
+taskSchema.methods.authTaskAccess = async function (userId, taskId) {
+  const user = await userModel.findById(userId)
+  const userHasTask = user.tasks.find(t => t == taskId)
+
+  if (!userHasTask) {
+    throw new UnauthorizedError(
+      unauthorized.ErrorMessage.FORBIDDEN_INVALID_ACCESS
+    )
+  }
+}
+
+taskSchema.methods.messagesToObject = function () {
+  return this.messages.map(message => message.toObject())
 }
 
 const Task = mongoose.model('Task', taskSchema)
