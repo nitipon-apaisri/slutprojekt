@@ -39,13 +39,12 @@ const signIn = async (req, res, next) => {
 const listUsers = async (req, res) => {
   const { role, search } = req.query
 
-  let filter = {}
+  const roleQuery = new RegExp(`.*${role && role !== 'all' ? role : ''}.*`, 'i')
+  const searchQuery = new RegExp(`.*${search || ''}.*`, 'i')
 
-  if (role && role !== 'all') {
-    filter.role = role
-  }
-  if (search) {
-    filter.username = search
+  let filter = {
+    role: { $regex: roleQuery },
+    username: { $regex: searchQuery }
   }
 
   const users = await userModel.find(filter)
