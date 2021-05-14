@@ -265,19 +265,31 @@ const postReport = async (req, res, next) => {
 const getReport = async (req, res, next) => {
   const id = req.params.id
   try {
+    const task = await taskModel.findById(id).populate('errorReports')
+    if (!task) {
+      throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
+    } else {
+      res.json({ task: task })
+    }
+  } catch (err) {
+    next(err)
+  }
+}
+
+const updateReport = async (req, res, next) => {
+  const id = req.params.id
+  const changeContent = req.body
+  try {
     const task = await taskModel.findById(id)
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     } else {
-      const reports = task.errorReports
-      let reportsInfo = []
-      reports.forEach(async report => {
-        let theReport = await reportModel.findById(report)
-        reportsInfo.push(theReport)
+      const reports = task.errorReports[0]
+      await reportModel.updateOne({ _id: reports }, changeContent, {
+        new: true
       })
-      setTimeout(() => {
-        res.json({ user: task, data: reportsInfo })
-      }, 300)
+      const findReport = await reportModel.findById(reports)
+      res.json({ data: findReport })
     }
   } catch (err) {
     next(err)
@@ -295,5 +307,6 @@ module.exports = {
   deleteMessage,
   postTaskImage,
   postReport,
-  getReport
+  getReport,
+  updateReport
 }

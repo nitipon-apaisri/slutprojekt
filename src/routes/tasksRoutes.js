@@ -82,4 +82,11 @@ router.get(
   taskController.getReport
 )
 
+router.patch(
+  '/tasks/:id/error_reports',
+  authMiddleware.authorization,
+  authAccess.workerAndClientAccess,
+  taskController.updateReport
+)
+
 module.exports = router
