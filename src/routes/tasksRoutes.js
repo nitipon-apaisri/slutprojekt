@@ -83,7 +83,7 @@ router.get(
 )
 
 router.patch(
-  '/tasks/:id/error_reports',
+  '/tasks/:id/error_reports/:reportId',
   authMiddleware.authorization,
   authAccess.workerAndClientAccess,
   taskController.updateReport

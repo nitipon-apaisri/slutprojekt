@@ -275,17 +275,17 @@ const getReport = async (req, res, next) => {
 
 const updateReport = async (req, res, next) => {
   const id = req.params.id
+  const reportId = req.params.reportId
   const changeContent = req.body
   try {
     const task = await taskModel.findById(id)
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     } else {
-      const reports = task.errorReports[0]
-      await reportModel.updateOne({ _id: reports }, changeContent, {
+      await reportModel.updateOne({ _id: reportId }, changeContent, {
         new: true
       })
-      const findReport = await reportModel.findById(reports)
+      const findReport = await reportModel.findById(reportId)
       res.json({ data: findReport })
     }
   } catch (err) {
