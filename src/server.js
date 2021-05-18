@@ -7,8 +7,6 @@ const loggerMiddleware = require('./middlewares/logger')
 const routes = require('./routes')
 const connect = require('./database/connection')
 
-const API_PREFIX = require('./utils/apiVersions')
-
 const corsOptions = require('./utils/cors')
 
 const PORT = process.env.PORT || 3000
@@ -20,9 +18,10 @@ if (process.env.NODE_ENV === 'dev') {
 app.use(cors(corsOptions))
 app.use('/static', express.static('public'))
 app.use(express.json())
-app.use(API_PREFIX['v1'], routes.genericRoutes)
-app.use(API_PREFIX['v1'], routes.usersRoutes)
-app.use(API_PREFIX['v1'], routes.taskRoutes)
+
+app.use('/api/v1', routes.genericRoutes)
+app.use('/api/v1', routes.usersRoutes)
+app.use('/api/v1', routes.taskRoutes)
 
 app.use(errorHandler)
 ;(async () => {

@@ -3,6 +3,7 @@ const authMiddleware = require('../middlewares/auth')
 const authAccess = require('../middlewares/userAccess')
 const { imageOnlyUpload, UploadKey } = require('../middlewares/fileUpload')
 const taskController = require('../controllers/taskController')
+const inputValidationMiddleware = require('../middlewares/inputValidation')
 
 const router = Router()
 
@@ -14,6 +15,7 @@ router.get(
 )
 router.post(
   '/tasks',
+  inputValidationMiddleware.validateTask,
   authMiddleware.authorization,
   authAccess.workerAccess,
   taskController.postCreateTask
@@ -26,6 +28,7 @@ router.get(
 )
 router.patch(
   '/tasks/:id',
+  inputValidationMiddleware.validateTask,
   authMiddleware.authorization,
   authAccess.workerAccess,
   taskController.patchUpdateTask
@@ -49,6 +52,7 @@ router.patch(
 )
 router.post(
   '/tasks/:id/messages',
+  inputValidationMiddleware.validateMessage,
   authMiddleware.authorization,
   authAccess.workerAndClientAccess,
   taskController.postMessageToTask
