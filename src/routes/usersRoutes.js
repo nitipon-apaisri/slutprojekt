@@ -2,6 +2,7 @@ const { Router } = require('express')
 const authMiddleware = require('../middlewares/auth')
 const authAccess = require('../middlewares/userAccess')
 const userController = require('../controllers/userController')
+const inputValidationMiddleware = require('../middlewares/inputValidation')
 const router = Router()
 
 router.get(
@@ -18,12 +19,14 @@ router.get(
 router.post(
   '/users',
   authMiddleware.authorization,
+  inputValidationMiddleware.validateUser,
   authAccess.adminAccess,
   userController.createUser
 )
 router.patch(
   '/users/:id',
   authMiddleware.authorization,
+  inputValidationMiddleware.validateUser,
   authAccess.adminAccess,
   userController.updateUser
 )
