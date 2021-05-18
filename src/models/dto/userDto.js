@@ -8,11 +8,13 @@ const postUserSchema = Joi.object({
   profile: Joi.object().optional().options({ allowUnknown: true })
 })
 
-const patchUserSchema = postUserSchema.fork(['username', 'password'], key =>
-  key.optional()
-)
+const patchUserSchema = postUserSchema
+  .fork(['username', 'password'], key => key.optional())
+  .min(1)
 
-const patchMeSchema = patchUserSchema.fork('role', key => key.forbidden())
+const patchMeSchema = patchUserSchema
+  .fork('role', key => key.forbidden())
+  .min(1)
 
 const postUserValidation = inputs => {
   const { error } = postUserSchema.validate(inputs)

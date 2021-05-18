@@ -18,10 +18,6 @@ const postCreateTask = async (req, res, next) => {
     const { user } = req
     const { title, info, clientId } = req.body
 
-    if (!(title && info && clientId)) {
-      throw new InvalidBodyError(invalidBody.ErrorMessage.POST_TASK)
-    }
-
     const client = await userModel.findById(clientId)
 
     if (!client) {
@@ -94,14 +90,6 @@ const patchUpdateTask = async (req, res, next) => {
     const query = req.body
     const { user } = req
 
-    if (!Object.keys(query).length) {
-      throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
-    }
-
-    if (!(query.title || query.info || query.client || query.completed)) {
-      throw new InvalidBodyError(invalidBody.ErrorMessage.UPDATE_TASK)
-    }
-
     const task = await taskModel.findByIdAndUpdate(taskId, query)
 
     if (!task) {
@@ -137,9 +125,6 @@ const postMessageToTask = async (req, res, next) => {
     const userId = req.user.id
     const taskId = req.params.id
     const { title, content } = req.body
-    if (!(title && content)) {
-      throw new InvalidBodyError(invalidBody.ErrorMessage.TASK_MESSAGE)
-    }
 
     const user = await userModel.findById(userId)
     const task = await taskModel.findById(taskId)

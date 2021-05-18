@@ -9,10 +9,9 @@ const postTaskSchema = Joi.object({
   completed: Joi.boolean().optional()
 })
 
-const patchTaskSchema = postTaskSchema.fork(
-  ['title', 'info', 'clientId'],
-  key => key.optional()
-)
+const patchTaskSchema = postTaskSchema
+  .fork(['title', 'info', 'clientId'], key => key.optional())
+  .min(1)
 
 const postTaskValidation = inputs => {
   const { error } = postTaskSchema.validate(inputs)
