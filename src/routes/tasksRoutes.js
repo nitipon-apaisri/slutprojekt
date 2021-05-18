@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const authMiddleware = require('../middlewares/auth')
 const authAccess = require('../middlewares/userAccess')
-const { imageOnlyUpload, UploadKey } = require('../configs/fileUpload')
+const { imageOnlyUpload, UploadKey } = require('../middlewares/fileUpload')
 const taskController = require('../controllers/taskController')
 
 const router = Router()

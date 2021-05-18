@@ -26,8 +26,12 @@ app.use(API_PREFIX['v1'], routes.taskRoutes)
 
 app.use(errorHandler)
 ;(async () => {
-  await connect()
-  await seed()
+  if (process.env.NODE_ENV !== 'prod') {
+    await connect.connect()
+  } else {
+    await connect.prodConnect()
+  }
   console.log('Connected to database.')
+  await seed()
   app.listen(PORT, () => console.log('Server running on port ' + PORT))
 })()

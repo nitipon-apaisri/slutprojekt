@@ -3,10 +3,8 @@ const {
   ErrorMessage
 } = require('../models/errors/unauthorized')
 
-let corsOptions
-if (process.env.NODE_ENV === 'dev') {
-  corsOptions = { origin: '*' }
-} else {
+let corsOptions = {}
+if (process.env.NODE_ENV === 'prod' && process.env.CORS_WHITELIST !== '*') {
   const whitelist = process.env.CORS_WHITELIST.split(';')
   corsOptions = {
     origin: function (origin, callback) {
@@ -20,6 +18,8 @@ if (process.env.NODE_ENV === 'dev') {
       }
     }
   }
+} else {
+  corsOptions.origin = '*'
 }
 
 module.exports = corsOptions
