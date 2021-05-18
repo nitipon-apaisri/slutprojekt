@@ -18,8 +18,8 @@ router.get(
 )
 router.post(
   '/users',
-  inputValidationMiddleware.validateUser,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateUser,
   authAccess.adminAccess,
   userController.createUser
 )

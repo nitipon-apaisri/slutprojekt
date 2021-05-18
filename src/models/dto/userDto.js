@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { InvalidBodyError } = require('../errors/invalidBody')
 
 const postUserSchema = Joi.object({
   username: Joi.string().min(5).required(),
@@ -14,19 +15,28 @@ const patchUserSchema = postUserSchema.fork(['username', 'password'], key =>
 const patchMeSchema = patchUserSchema.fork('role', key => key.forbidden())
 
 const postUserValidation = inputs => {
-  return postUserSchema.validate(inputs)
+  const { error } = postUserSchema.validate(inputs)
+  if (error) {
+    throw new InvalidBodyError(error)
+  }
 }
 
 const patchUserValidation = inputs => {
-  return patchUserSchema.validate(inputs)
+  const { error } = patchUserSchema.validate(inputs)
+  if (error) {
+    throw new InvalidBodyError(error)
+  }
 }
 
-const patchUserMeValidation = inputs => {
-  return patchMeSchema.validate(inputs)
+const patchMeValidation = inputs => {
+  const { error } = patchMeSchema.validate(inputs)
+  if (error) {
+    throw new InvalidBodyError(error)
+  }
 }
 
 module.exports = {
   postUserValidation,
   patchUserValidation,
-  patchUserMeValidation
+  patchMeValidation
 }

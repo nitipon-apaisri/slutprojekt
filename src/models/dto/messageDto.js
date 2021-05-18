@@ -1,12 +1,16 @@
 const Joi = require('joi')
+const { InvalidBodyError } = require('../errors/invalidBody')
 
-const postSchema = Joi.object({
+const postMessageSchema = Joi.object({
   title: Joi.string().required(),
   content: Joi.string().required()
 })
 
-const postValidation = inputs => {
-  return postSchema.validate(inputs)
+const postMessageValidation = inputs => {
+  const { error } = postMessageSchema.validate(inputs)
+  if (error) {
+    throw new InvalidBodyError(error)
+  }
 }
 
-module.exports = { postValidation }
+module.exports = { postMessageValidation }

@@ -12,7 +12,7 @@ const ErrorMessage = {
 
 class InvalidBodyError extends BaseError {
   constructor(message) {
-    super(message, 404)
+    super(message, 400)
   }
 }
 
