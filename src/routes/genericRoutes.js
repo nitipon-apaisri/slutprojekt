@@ -8,8 +8,8 @@ router.post('/auth', userController.signIn)
 router.get('/me', authMiddleware.authorization, userController.getMe)
 router.patch(
   '/me',
-  inputValidationMiddleware.validateUserMe,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateUserMe,
   userController.updateMe
 )
 

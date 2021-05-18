@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
 const userModel = require('../models/userModel')
-const bodyErr = require('../models/errors/invalidBody')
 const notFoundErr = require('../models/errors/notFound')
 
 const createUser = async (req, res, next) => {

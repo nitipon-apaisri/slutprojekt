@@ -15,8 +15,8 @@ router.get(
 )
 router.post(
   '/tasks',
-  inputValidationMiddleware.validateTask,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateTask,
   authAccess.workerAccess,
   taskController.postCreateTask
 )
@@ -28,8 +28,8 @@ router.get(
 )
 router.patch(
   '/tasks/:id',
-  inputValidationMiddleware.validateTask,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateTask,
   authAccess.workerAccess,
   taskController.patchUpdateTask
 )
@@ -52,8 +52,8 @@ router.patch(
 )
 router.post(
   '/tasks/:id/messages',
-  inputValidationMiddleware.validateMessage,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateMessage,
   authAccess.workerAndClientAccess,
   taskController.postMessageToTask
 )

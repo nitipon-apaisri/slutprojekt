@@ -25,8 +25,8 @@ router.post(
 )
 router.patch(
   '/users/:id',
-  inputValidationMiddleware.validateUser,
   authMiddleware.authorization,
+  inputValidationMiddleware.validateUser,
   authAccess.adminAccess,
   userController.updateUser
 )
