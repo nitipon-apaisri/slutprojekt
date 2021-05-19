@@ -21,7 +21,8 @@ const userSchema = new Schema(
     profile: {
       firstName: String,
       lastName: String,
-      age: Number
+      age: Number,
+      company: String
     },
     tasks: [{ type: mongoose.Types.ObjectId, ref: 'Task' }]
   },

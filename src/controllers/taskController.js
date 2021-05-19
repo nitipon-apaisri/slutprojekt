@@ -68,7 +68,7 @@ const getTaskById = async (req, res, next) => {
 
     const { role, id } = req.user
 
-    const task = await taskModel.findById(taskId)
+    const task = await taskModel.findById(taskId).populate('messages')
     if (!task) {
       throw new NotFoundError(notFound.ErrorMessage.TASK_ID)
     }

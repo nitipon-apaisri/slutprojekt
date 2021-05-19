@@ -48,7 +48,12 @@ const listUsers = async (req, res) => {
 const getMe = async (req, res, next) => {
   const { id } = req.user
   try {
-    const user = await userModel.findById(id)
+    const user = await userModel
+      .findById(id)
+      .populate({
+        path: 'tasks',
+        populate: { path: 'messages', model: 'Message' }
+      })
     res.json({ data: user.toObject() })
   } catch (error) {
     next(error)

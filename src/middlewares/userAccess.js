@@ -7,7 +7,7 @@ const Role = {
 }
 
 const authInvalidAccessError = () => {
-  throw new authError.Unauthorized(
+  throw new authError.UnauthorizedError(
     authError.ErrorMessage.FORBIDDEN_INVALID_ACCESS
   )
 }

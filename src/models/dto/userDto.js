@@ -6,7 +6,11 @@ const postUserSchema = Joi.object({
   password: Joi.string().min(5).required(),
   role: Joi.string().optional(),
   profile: Joi.object().optional().options({ allowUnknown: true })
-})
+}).error(
+  new Error(
+    'invalid body, username and password is required, role and profile is optional'
+  )
+)
 
 const patchUserSchema = postUserSchema
   .fork(['username', 'password'], key => key.optional())
