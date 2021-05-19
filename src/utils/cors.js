@@ -4,11 +4,13 @@ const {
 } = require('../models/errors/unauthorized')
 
 let corsOptions = {}
-if (process.env.NODE_ENV === 'prod' && process.env.CORS_WHITELIST !== '*') {
+if (
+  process.env.NODE_ENV === 'production' &&
+  process.env.CORS_WHITELIST !== '*'
+) {
   const whitelist = process.env.CORS_WHITELIST.split(';')
   corsOptions = {
     origin: function (origin, callback) {
-      console.log(origin)
       if (whitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {

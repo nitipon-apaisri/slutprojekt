@@ -1,6 +1,17 @@
 const userModel = require('../models/userModel')
 const taskModel = require('../models/taskModel')
 
+const { connect, prodConnect } = require('./connection')
+
+;(async () => {
+  if (process.env.NODE_ENV === 'production') {
+    await prodConnect()
+  } else {
+    await connect()
+  }
+  await seed()
+})()
+
 const seed = async () => {
   const userAdmin = await userModel.create({
     username: 'admin',
@@ -54,4 +65,5 @@ const seed = async () => {
   userWorker.tasks.push(task, task1)
   await userWorker.save()
 }
+
 module.exports = seed

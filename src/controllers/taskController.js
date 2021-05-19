@@ -3,15 +3,8 @@ const reportModel = require('../models/reportModel')
 const userModel = require('../models/userModel')
 const messageModel = require('../models/messageModel')
 
-const invalidBody = require('../models/errors/invalidBody')
-const { InvalidBodyError } = invalidBody
-
 const notFound = require('../models/errors/notFound')
 const { NotFoundError } = notFound
-
-const unauthorized = require('../models/errors/unauthorized')
-const { report } = require('../routes/usersRoutes')
-const { UnauthorizedError } = unauthorized
 
 const postCreateTask = async (req, res, next) => {
   try {

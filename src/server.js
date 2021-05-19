@@ -25,12 +25,12 @@ app.use('/api/v1', routes.taskRoutes)
 
 app.use(errorHandler)
 ;(async () => {
-  if (process.env.NODE_ENV !== 'prod') {
+  if (process.env.NODE_ENV === 'dev') {
     await connect.connect()
+    await seed()
   } else {
     await connect.prodConnect()
   }
   console.log('Connected to database.')
-  await seed()
   app.listen(PORT, () => console.log('Server running on port ' + PORT))
 })()
