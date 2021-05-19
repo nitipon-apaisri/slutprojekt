@@ -1,4 +1,6 @@
 node_modules
 .vscode
 config/*.env
-public/images
+public/images/*.png
+public/images/*.jpg
+public/images/*.jpeg
