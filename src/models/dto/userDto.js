@@ -15,29 +15,43 @@ const postUserSchema = Joi.object({
 const patchUserSchema = postUserSchema
   .fork(['username', 'password'], key => key.optional())
   .min(1)
+  .error(
+    new Error(
+      'invalid body, optional values are: username, password, role and profile'
+    )
+  )
 
 const patchMeSchema = patchUserSchema
   .fork('role', key => key.forbidden())
   .min(1)
+  .error(
+    new Error(
+      'invalid body, optional values are: username, password and profile'
+    )
+  )
+
+const errorHandler = message => {
+  throw new InvalidBodyError(message.toString().replace('Error: ', ''))
+}
 
 const postUserValidation = inputs => {
   const { error } = postUserSchema.validate(inputs)
   if (error) {
-    throw new InvalidBodyError(error)
+    errorHandler(error)
   }
 }
 
 const patchUserValidation = inputs => {
   const { error } = patchUserSchema.validate(inputs)
   if (error) {
-    throw new InvalidBodyError(error)
+    errorHandler(error)
   }
 }
 
 const patchMeValidation = inputs => {
   const { error } = patchMeSchema.validate(inputs)
   if (error) {
-    throw new InvalidBodyError(error)
+    errorHandler(error)
   }
 }
 
