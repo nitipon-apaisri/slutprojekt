@@ -1,5 +1,6 @@
 const { prodConnect } = require('./connection')
-const userModel = require('../models/userModel')(() => {
+const userModel = require('../models/userModel')
+;(() => {
   await prodConnect()
   const user = await userModel.create({
     username: 'admin',
