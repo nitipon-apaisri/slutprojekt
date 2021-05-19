@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const helmet = require('helmet')
 const seed = require('./database/seed')
-const prodSeed = require('./database/prodSeed')
 const errorHandler = require('./middlewares/errorHandler')
 const loggerMiddleware = require('./middlewares/logger')
 
@@ -16,6 +16,7 @@ const app = express()
 if (process.env.NODE_ENV === 'dev') {
   app.use(loggerMiddleware)
 }
+app.use(helmet())
 app.use(cors(corsOptions))
 app.use('/static', express.static('public'))
 app.use(express.json())

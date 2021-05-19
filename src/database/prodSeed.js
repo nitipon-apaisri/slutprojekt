@@ -7,6 +7,6 @@ productionSeed = async () => {
     username: 'admin',
     password: process.env.SEEDED_ADMIN_PASSWORD
   })
-  user.save()
+  await user.save()
   process.exit(0)
 }
