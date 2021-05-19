@@ -26,7 +26,10 @@ app.use('/api/v1', routes.taskRoutes)
 
 app.use(errorHandler)
 ;(async () => {
-  if (process.env.NODE_ENV === 'production' || 'testing') {
+  if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'testing'
+  ) {
     await connect.prodConnect()
   } else {
     await connect.connect()
