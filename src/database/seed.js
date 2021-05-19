@@ -1,17 +1,6 @@
 const userModel = require('../models/userModel')
 const taskModel = require('../models/taskModel')
 
-const { connect, prodConnect } = require('./connection')
-
-;(async () => {
-  if (process.env.NODE_ENV === 'production') {
-    await prodConnect()
-  } else {
-    await connect()
-  }
-  await seed()
-})()
-
 const seed = async () => {
   const userAdmin = await userModel.create({
     username: 'admin',

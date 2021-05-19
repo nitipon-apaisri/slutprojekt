@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const seed = require('./database/seed')
+const prodSeed = require('./database/prodSeed')
 const errorHandler = require('./middlewares/errorHandler')
 const loggerMiddleware = require('./middlewares/logger')
 
@@ -25,11 +26,11 @@ app.use('/api/v1', routes.taskRoutes)
 
 app.use(errorHandler)
 ;(async () => {
-  if (process.env.NODE_ENV === 'dev') {
+  if (process.env.NODE_ENV === 'production' || 'testing') {
+    await connect.prodConnect()
+  } else {
     await connect.connect()
     await seed()
-  } else {
-    await connect.prodConnect()
   }
   console.log('Connected to database.')
   app.listen(PORT, () => console.log('Server running on port ' + PORT))
