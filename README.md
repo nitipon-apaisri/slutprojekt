@@ -34,7 +34,7 @@ npm run dev - starts development server
 
 ### Endpoints
 
-- Generic endpoints
+**Generic endpoints**
 
 | Method  | Path    | Requested info                                           | Role   | Response                  |
 | ------- | ------- | -------------------------------------------------------- | ------ | ------------------------- |
@@ -42,21 +42,21 @@ npm run dev - starts development server
 | GET     | `/me`   | --                                                       | all    | `data: { User, tasks: [ { Task, Message[], ErrorReport[] } ] }` |
 | PATCH   | `/me`   | body: `{ username?, password?, profile?: { anything } }` | all    | `{ message }` |
 
-- Users endpoints
+**Users endpoints**
 
 | Method  | Path         | Requested info                                                           | Role          | Response           |
-| ------- | ------------ | ------------------------------------------------------------------------ | ------        | ------------------ |
+| ------- | ------------ | ------------------------------------------------------------------------ | ------        | ------------------- |
 | GET     | `/users`     | query: role (search for user role), search (search by username)          | admin, worker | `{ data: User[] }` |
 | POST    | `/users`     | body: `{ username, password, role? }`                                    | admin         | `{ message }`      |
 | GET     | `/users/:id` | --                                                                       | all           | `{ data: User }`   |
 | PATCH   | `/users/:id` | body: `{  username?, password?, profile?: { anything }, role?  }`        | admin         | `{ data: User }`   |
 | DELETE  | `/users/:id` | --                                                                       | admin         | `{ message }`      |
 
-- Tasks endpoints
+**Tasks endpoints**
 
 | Method  | Path                          | Requested info                                                         | Role           | Response          |
 | ------- | ----------------------------- | ---------------------------------------------------------------------- | ------         | ----------------- |
-| GET     | `/tasks`                      | query: filter (search for done or all), search (search by client name) | worker, client | `Task[]`          |
+| GET     | `/tasks`                      | query: filter (search for done or all), search (search by client name) | worker, client | `{ Task[] }`          |
 | POST    | `/tasks`                      | body: `{ title, info, clientId }`                                      | worker         | `{ message }`     |
 | GET     | `/tasks/:id`                  | --                                                                     | worker, client | `{ Task }`        |
 | PATCH   | `/tasks/:id`                  | body: `{  title?, info?, clientId?, completed? }`                      | worker         | `{ message }`     |
