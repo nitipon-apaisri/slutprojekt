@@ -34,10 +34,33 @@ npm run dev - starts development server
 
 ### Endpoints
 
-- Generics (accessible for all users)
+- Generic endpoints
 
-| Method  | Path    | Requested info | Role    | Response |
-| ------- | ------- | ------ | ------- | ------- |
-| POST    | `/auth` | body: `{ username and password }` | none    | `{ message, token }` |
-| GET     | `/me`   | -- | all     | `data: { User, tasks: [ { Task, Message[], ErrorReport[] } ] }` |
-| PATCH     | `/me`   | body: `{ username?, password?, profile?: { anything } }` |  all     |`{ message }` |
+| Method  | Path    | Requested info                                           | Role   | Response                  |
+| ------- | ------- | -------------------------------------------------------- | ------ | ------------------------- |
+| POST    | `/auth` | body: `{ username, password }`                           | none   | `{ message, token }` |
+| GET     | `/me`   | --                                                       | all    | `data: { User, tasks: [ { Task, Message[], ErrorReport[] } ] }` |
+| PATCH   | `/me`   | body: `{ username?, password?, profile?: { anything } }` | all    | `{ message }` |
+
+- Users endpoints
+
+| Method  | Path         | Requested info                                                           | Role          | Response           |
+| ------- | ------------ | ------------------------------------------------------------------------ | ------        | ------------------ |
+| GET     | `/users`     | query: role (search for user role), search (search by username)          | admin, worker | `{ data: User[] }` |
+| POST    | `/users`     | body: `{ username, password, role? }`                                    | admin         | `{ message }`      |
+| GET     | `/users/:id` | --                                                                       | all           | `{ data: User }`   |
+| PATCH   | `/users/:id` | body: `{  username?, password?, profile?: { anything }, role?  }`        | admin         | `{ data: User }`   |
+| DELETE  | `/users/:id` | --                                                                       | admin         | `{ message }`      |
+
+- Tasks endpoints
+
+| Method  | Path                          | Requested info                                                         | Role           | Response          |
+| ------- | ----------------------------- | ---------------------------------------------------------------------- | ------         | ----------------- |
+| GET     | `/tasks`                      | query: filter (search for done or all), search (search by client name) | worker, client | `Task[]`          |
+| POST    | `/tasks`                      | body: `{ title, info, clientId }`                                      | worker         | `{ message }`     |
+| GET     | `/tasks/:id`                  | --                                                                     | worker, client | `{ Task }`        |
+| PATCH   | `/tasks/:id`                  | body: `{  title?, info?, clientId?, completed? }`                      | worker         | `{ message }`     |
+| DELETE  | `/tasks/:id`                  | --                                                                     | admin          | `{ message }`     |
+| POST    | `/tasks/:id/image`            | multipart-form: imageUpload (.jpg, .jpeg, .png)                        | worker         | `{ message, data: imageUrl }` | 
+| GET     | `/tasks/:id/messages`         | query: limit (number), page (number)                                   | worker, client | `{ Message[] }`   |
+| DELETE  | `/tasks/:id/messages/:msg_id` | --                                                                     | worker, client | `{ message }`     |
