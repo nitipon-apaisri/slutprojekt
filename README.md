@@ -27,3 +27,8 @@ npm run dev - starts development server
 - Follow the instructions to access all requests for testing
 
 ### Endpoints
+
+| Method  | Path    | Comment |
+| ------- | ------- | ------- |
+| POST    | /auth   | log in a user |
+| GET     | /me     | returns info for logged in user |
