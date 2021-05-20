@@ -4,11 +4,11 @@
 ``` 
 Shall be put in the root /config folder.
 ```
-** Development File **
+**Development File**
 
 - .dev.env
 
-** Example .dev.env file **
+**Example .dev.env file**
 ``` 
 JWT_SECRET=mysecret
 NODE_ENV=dev
