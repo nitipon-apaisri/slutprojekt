@@ -30,5 +30,5 @@ npm run dev - starts development server
 
 | Method  | Path    | Comment |
 | ------- | ------- | ------- |
-| POST    | /auth   | log in a user |
-| GET     | /me     | returns info for logged in user |
+| POST    | `/auth`   | log in a user |
+| GET     | `/me`     | returns info for logged in user |
