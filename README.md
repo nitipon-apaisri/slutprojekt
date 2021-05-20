@@ -26,9 +26,18 @@ npm run dev - starts development server
 - Request collection can be found in the Trello-board on the card Testing in column Project
 - Follow the instructions to access all requests for testing
 
+### Database Entities
+- User
+- Task
+- Message
+- ErrorReport
+
 ### Endpoints
 
-| Method  | Path    | Comment |
-| ------- | ------- | ------- |
-| POST    | `/auth`   | log in a user |
-| GET     | `/me`     | returns info for logged in user |
+- Generics (accessible for all users)
+
+| Method  | Path    | Requested info | Role    | Response |
+| ------- | ------- | ------ | ------- | ------- |
+| POST    | `/auth` | body: `{ username and password }` | none    | `{ message, token }` |
+| GET     | `/me`   | -- | all     | `data: { User, tasks: [ { Task, Message[], ErrorReport[] } ] }` |
+| PATCH     | `/me`   | body: `{ username?, password?, profile?: { anything } }` |  all     |`{ message }` |
